@@ -3,6 +3,7 @@ const stringify = require(`json-stringify-safe`)
 const { createContentDigest } = require(`gatsby-core-utils`)
 
 const digest = str => createContentDigest(str)
+const { getNormalizedRichTextField } = require(`./rich-text`)
 const typePrefix = `Contentful`
 const makeTypeName = type => _.upperFirst(_.camelCase(`${typePrefix} ${type}`))
 
@@ -125,12 +126,16 @@ exports.buildResolvableSet = ({
   const resolvable = new Set()
   existingNodes.forEach(n => {
     if (n.contentful_id) {
-      // We need to add only root level resolvable (assets and entries)
-      // derived nodes (markdown or JSON) will be recreated if needed.
-      // We also need to apply `fixId` as some objects will have ids
-      // prefixed with `c` and fixIds will recursively apply that
-      // and resolvable ids need to match that.
-      resolvable.add(fixId(n.contentful_id))
+      if (process.env.EXPERIMENTAL_CONTENTFUL_SKIP_NORMALIZE_IDS) {
+        resolvable.add(n.contentful_id)
+      } else {
+        // We need to add only root level resolvable (assets and entries)
+        // derived nodes (markdown or JSON) will be recreated if needed.
+        // We also need to apply `fixId` as some objects will have ids
+        // prefixed with `c` and fixIds will recursively apply that
+        // and resolvable ids need to match that.
+        resolvable.add(fixId(n.contentful_id))
+      }
     }
   })
 
@@ -280,8 +285,9 @@ function prepareJSONNode(node, key, content, createNodeId, i = ``) {
   return JSONNode
 }
 
-exports.createContentTypeNodes = ({
+exports.createNodesForContentType = ({
   contentTypeItem,
+  contentTypeItems,
   restrictedNodeFields,
   conflictFieldPrefix,
   entries,
@@ -293,6 +299,7 @@ exports.createContentTypeNodes = ({
   locales,
   space,
   useNameForId,
+  richTextOptions,
 }) => {
   // Establish identifier for content type
   //  Use `name` if specified, otherwise, use internal id (usually a natural-language constant,
@@ -304,6 +311,7 @@ exports.createContentTypeNodes = ({
     contentTypeItemId = contentTypeItem.sys.id
   }
 
+  const createNodePromises = []
   locales.forEach(locale => {
     const localesFallback = buildFallbackChain(locales)
     const mId = makeMakeId({
@@ -335,10 +343,31 @@ exports.createContentTypeNodes = ({
       // Get localized fields.
       const entryItemFields = _.mapValues(entryItem.fields, (v, k) => {
         const fieldProps = contentTypeItem.fields.find(field => field.id === k)
-        if (fieldProps.localized) {
-          return getField(v)
+
+        const localizedField = fieldProps.localized
+          ? getField(v)
+          : v[defaultLocale]
+
+        if (
+          fieldProps.type === `RichText` &&
+          richTextOptions &&
+          richTextOptions.resolveFieldLocales
+        ) {
+          const contentTypesById = new Map()
+          contentTypeItems.forEach(contentTypeItem =>
+            contentTypesById.set(contentTypeItem.sys.id, contentTypeItem)
+          )
+
+          return getNormalizedRichTextField({
+            field: localizedField,
+            fieldProps,
+            contentTypesById,
+            getField,
+            defaultLocale,
+          })
         }
-        return v[defaultLocale]
+
+        return localizedField
       })
 
       // Prefix any conflicting fields
@@ -364,10 +393,10 @@ exports.createContentTypeNodes = ({
               // creating an empty node field in case when original key field value
               // is empty due to links to missing entities
               const resolvableEntryItemFieldValue = entryItemFieldValue
-                .filter(function(v) {
+                .filter(function (v) {
                   return resolvable.has(v.sys.id)
                 })
-                .map(function(v) {
+                .map(function (v) {
                   return mId(space.sys.id, v.sys.id)
                 })
               if (resolvableEntryItemFieldValue.length !== 0) {
@@ -422,7 +451,9 @@ exports.createContentTypeNodes = ({
       let entryNode = {
         id: mId(space.sys.id, entryItem.sys.id),
         spaceId: space.sys.id,
-        contentful_id: entryItem.sys.contentful_id,
+        contentful_id: process.env.EXPERIMENTAL_CONTENTFUL_SKIP_NORMALIZE_IDS
+          ? entryItem.sys.id
+          : entryItem.sys.contentful_id,
         createdAt: entryItem.sys.createdAt,
         updatedAt: entryItem.sys.updatedAt,
         parent: contentTypeItemId,
@@ -442,15 +473,6 @@ exports.createContentTypeNodes = ({
       if (entryItem.sys.contentType) {
         entryNode.sys.contentType = entryItem.sys.contentType
       }
-
-      // Use default locale field.
-      Object.keys(entryItemFields).forEach(entryItemFieldKey => {
-        // Ignore fields with "___node" as they're already handled
-        // and won't be a text field.
-        if (entryItemFieldKey.split(`___`).length > 1) {
-          return
-        }
-      })
 
       // Replace text fields with text nodes so we can process their markdown
       // into HTML.
@@ -560,14 +582,16 @@ exports.createContentTypeNodes = ({
 
     contentTypeNode.internal.contentDigest = contentDigest
 
-    createNode(contentTypeNode)
+    createNodePromises.push(createNode(contentTypeNode))
     entryNodes.forEach(entryNode => {
-      createNode(entryNode)
+      createNodePromises.push(createNode(entryNode))
     })
     childrenNodes.forEach(entryNode => {
-      createNode(entryNode)
+      createNodePromises.push(createNode(entryNode))
     })
   })
+
+  return createNodePromises
 }
 
 exports.createAssetNodes = ({
@@ -578,6 +602,7 @@ exports.createAssetNodes = ({
   locales,
   space,
 }) => {
+  const createNodePromises = []
   locales.forEach(locale => {
     const localesFallback = buildFallbackChain(locales)
     const mId = makeMakeId({
@@ -590,31 +615,31 @@ exports.createAssetNodes = ({
       localesFallback,
     })
 
-    const localizedAsset = { ...assetItem }
-    // Create a node for each asset. They may be referenced by Entries
-    //
-    // Get localized fields.
-    localizedAsset.fields = {
-      file: localizedAsset.fields.file
-        ? getField(localizedAsset.fields.file)
-        : null,
-      title: localizedAsset.fields.title
-        ? getField(localizedAsset.fields.title)
-        : ``,
-      description: localizedAsset.fields.description
-        ? getField(localizedAsset.fields.description)
-        : ``,
-    }
     const assetNode = {
-      contentful_id: localizedAsset.sys.contentful_id,
-      id: mId(space.sys.id, localizedAsset.sys.id),
+      contentful_id: process.env.EXPERIMENTAL_CONTENTFUL_SKIP_NORMALIZE_IDS
+        ? assetItem.sys.id
+        : assetItem.sys.contentful_id,
+      spaceId: space.sys.id,
+      id: mId(space.sys.id, assetItem.sys.id),
+      createdAt: assetItem.sys.createdAt,
+      updatedAt: assetItem.sys.updatedAt,
       parent: null,
       children: [],
-      ...localizedAsset.fields,
+      file: assetItem.fields.file ? getField(assetItem.fields.file) : null,
+      title: assetItem.fields.title ? getField(assetItem.fields.title) : ``,
+      description: assetItem.fields.description
+        ? getField(assetItem.fields.description)
+        : ``,
       node_locale: locale.code,
       internal: {
         type: `${makeTypeName(`Asset`)}`,
       },
+      sys: {},
+    }
+
+    // Revision applies to entries, assets, and content types
+    if (assetItem.sys.revision) {
+      assetNode.sys.revision = assetItem.sys.revision
     }
 
     // Get content digest of node.
@@ -622,6 +647,8 @@ exports.createAssetNodes = ({
 
     assetNode.internal.contentDigest = contentDigest
 
-    createNode(assetNode)
+    createNodePromises.push(createNode(assetNode))
   })
+
+  return createNodePromises
 }

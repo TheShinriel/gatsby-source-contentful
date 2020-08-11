@@ -1,10 +1,15 @@
+"use strict";
+
+exports.__esModule = true;
+exports.createPluginConfig = exports.maskText = exports.formatPluginOptionsForCLI = exports.validateOptions = exports.defaultOptions = void 0;
+
 const Joi = require(`@hapi/joi`);
 
 const chalk = require(`chalk`);
 
 const _ = require(`lodash`);
 
-const DEFAULT_PAGE_LIMIT = 1000;
+const DEFAULT_PAGE_LIMIT = 100;
 const defaultOptions = {
   host: `cdn.contentful.com`,
   environment: `master`,
@@ -14,6 +19,7 @@ const defaultOptions = {
   pageLimit: DEFAULT_PAGE_LIMIT,
   useNameForId: true
 };
+exports.defaultOptions = defaultOptions;
 
 const createPluginConfig = pluginOptions => {
   const conf = { ...defaultOptions,
@@ -25,6 +31,7 @@ const createPluginConfig = pluginOptions => {
   };
 };
 
+exports.createPluginConfig = createPluginConfig;
 const optionsSchema = Joi.object().keys({
   accessToken: Joi.string().required().empty(),
   spaceId: Joi.string().required().empty(),
@@ -34,17 +41,22 @@ const optionsSchema = Joi.object().keys({
   localeFilter: Joi.func(),
   forceFullSync: Joi.boolean(),
   pageLimit: Joi.number().integer(),
-  proxy: Joi.object().keys({
+  proxy: Joi.alternatives([Joi.boolean(), Joi.object().keys({
     host: Joi.string().required(),
     port: Joi.number().required(),
     auth: Joi.object().keys({
       username: Joi.string(),
       password: Joi.string()
     })
-  }),
+  })]),
+  httpAgent: Joi.any(),
+  httpsAgent: Joi.any(),
   useNameForId: Joi.boolean(),
   // default plugins passed by gatsby
-  plugins: Joi.array()
+  plugins: Joi.array(),
+  richText: Joi.object().keys({
+    resolveFieldLocales: Joi.boolean()
+  }).default({})
 });
 const maskedFields = [`accessToken`, `spaceId`];
 
@@ -64,6 +76,8 @@ const validateOptions = ({
 ${exports.formatPluginOptionsForCLI(options, errors)}`);
   }
 };
+
+exports.validateOptions = validateOptions;
 
 const formatPluginOptionsForCLI = (pluginOptions, errors = {}) => {
   const optionKeys = new Set(Object.keys(pluginOptions).concat(Object.keys(defaultOptions)).concat(Object.keys(errors)));
@@ -106,10 +120,12 @@ const formatPluginOptionsForCLI = (pluginOptions, errors = {}) => {
  */
 
 
+exports.formatPluginOptionsForCLI = formatPluginOptionsForCLI;
+
 const maskText = input => {
   // show just 25% of string up to 4 characters
   const hiddenCharactersLength = input.length - Math.min(4, Math.floor(input.length * 0.25));
   return `${`*`.repeat(hiddenCharactersLength)}${input.substring(hiddenCharactersLength)}`;
 };
 
-export { defaultOptions, validateOptions, formatPluginOptionsForCLI, maskText, createPluginConfig };
+exports.maskText = maskText;

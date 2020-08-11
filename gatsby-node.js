@@ -39,9 +39,11 @@ exports.sourceNodes = async ({
   actions,
   getNode,
   getNodes,
+  getNodesByType,
   createNodeId,
   store,
   cache,
+  getCache,
   reporter
 }, pluginOptions) => {
   const {
@@ -54,11 +56,24 @@ exports.sourceNodes = async ({
   // For prod builds though always fail if we can't get the latest data
 
   if (!online && process.env.GATSBY_CONTENTFUL_OFFLINE === `true` && process.env.NODE_ENV !== `production`) {
-    getNodes().filter(n => n.internal.owner === `gatsby-source-contentful`).forEach(n => touchNode({
-      nodeId: n.id
-    }));
-    console.log(`Using Contentful Offline cache ⚠️`);
-    console.log(`Cache may be invalidated if you edit package.json, gatsby-node.js or gatsby-config.js files`);
+    getNodes().forEach(node => {
+      if (node.internal.owner !== `gatsby-source-contentful`) {
+        return;
+      }
+
+      touchNode({
+        nodeId: node.id
+      });
+
+      if (node.localFile___NODE) {
+        // Prevent GraphQL type inference from crashing on this property
+        touchNode({
+          nodeId: node.localFile___NODE
+        });
+      }
+    });
+    reporter.info(`Using Contentful Offline cache ⚠️`);
+    reporter.info(`Cache may be invalidated if you edit package.json, gatsby-node.js or gatsby-config.js files`);
     return;
   }
 
@@ -101,9 +116,15 @@ exports.sourceNodes = async ({
       }));
       return getNode(nodeId);
     }).filter(node => node);
-    localizedNodes.forEach(node => deleteNode({
-      node
-    }));
+    localizedNodes.forEach(node => {
+      // touchNode first, to populate typeOwners & avoid erroring
+      touchNode({
+        nodeId: node.id
+      });
+      deleteNode({
+        node
+      });
+    });
   }
 
   currentSyncData.deletedEntries.forEach(deleteContentfulNode);
@@ -113,10 +134,10 @@ exports.sourceNodes = async ({
     nodeId: n.id
   }));
   const assets = currentSyncData.assets;
-  console.log(`Updated entries `, currentSyncData.entries.length);
-  console.log(`Deleted entries `, currentSyncData.deletedEntries.length);
-  console.log(`Updated assets `, currentSyncData.assets.length);
-  console.log(`Deleted assets `, currentSyncData.deletedAssets.length);
+  reporter.info(`Updated entries ${currentSyncData.entries.length}`);
+  reporter.info(`Deleted entries ${currentSyncData.deletedEntries.length}`);
+  reporter.info(`Updated assets ${currentSyncData.assets.length}`);
+  reporter.info(`Deleted assets ${currentSyncData.deletedAssets.length}`);
   console.timeEnd(`Fetch Contentful data`); // Update syncToken
 
   const nextSyncToken = currentSyncData.nextSyncToken; // Store our sync state for the next sync.
@@ -168,9 +189,15 @@ exports.sourceNodes = async ({
       });
     }
   });
-  contentTypeItems.forEach((contentTypeItem, i) => {
-    normalize.createContentTypeNodes({
+
+  for (let i = 0; i < contentTypeItems.length; i++) {
+    const contentTypeItem = contentTypeItems[i]; // A contentType can hold lots of entries which create nodes
+    // We wait until all nodes are created and processed until we handle the next one
+    // TODO add batching in gatsby-core
+
+    await Promise.all(normalize.createNodesForContentType({
       contentTypeItem,
+      contentTypeItems,
       restrictedNodeFields,
       conflictFieldPrefix,
       entries: entryList[i],
@@ -181,19 +208,22 @@ exports.sourceNodes = async ({
       defaultLocale,
       locales,
       space,
-      useNameForId: pluginConfig.get(`useNameForId`)
-    });
-  });
-  assets.forEach(assetItem => {
-    normalize.createAssetNodes({
-      assetItem,
+      useNameForId: pluginConfig.get(`useNameForId`),
+      richTextOptions: pluginConfig.get(`richText`)
+    }));
+  }
+
+  for (let i = 0; i < assets.length; i++) {
+    // We wait for each asset to be process until handling the next one.
+    await Promise.all(normalize.createAssetNodes({
+      assetItem: assets[i],
       createNode,
       createNodeId,
       defaultLocale,
       locales,
       space
-    });
-  });
+    }));
+  }
 
   if (pluginConfig.get(`downloadLocal`)) {
     await downloadContentfulAssets({
@@ -201,7 +231,8 @@ exports.sourceNodes = async ({
       createNodeId,
       store,
       cache,
-      getNodes,
+      getCache,
+      getNodesByType,
       reporter
     });
   }
