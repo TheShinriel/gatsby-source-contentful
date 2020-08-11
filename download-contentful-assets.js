@@ -1,3 +1,5 @@
+"use strict";
+
 const ProgressBar = require(`progress`);
 
 const {

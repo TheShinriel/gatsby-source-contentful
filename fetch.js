@@ -1,3 +1,5 @@
+"use strict";
+
 const contentful = require(`contentful`);
 
 const _ = require(`lodash`);
@@ -10,14 +12,15 @@ const {
   formatPluginOptionsForCLI
 } = require(`./plugin-options`);
 
-module.exports = async ({
+module.exports = async function contentfulFetch({
   syncToken,
   reporter,
   pluginConfig
-}) => {
+}) {
   // Fetch articles.
   console.time(`Fetch Contentful data`);
   console.log(`Starting to fetch data from Contentful`);
+  const pageLimit = pluginConfig.get(`pageLimit`);
   const contentfulClientOptions = {
     space: pluginConfig.get(`spaceId`),
     accessToken: pluginConfig.get(`accessToken`),
@@ -37,14 +40,19 @@ module.exports = async ({
   let defaultLocale = `en-US`;
 
   try {
-    console.log(`Fetching default locale`);
+    reporter.info(`Fetching default locale`);
     space = await client.getSpace();
-    locales = await client.getLocales().then(response => response.items);
-    defaultLocale = _.find(locales, {
+    let contentfulLocales = await client.getLocales().then(response => response.items);
+    defaultLocale = _.find(contentfulLocales, {
       default: true
     }).code;
-    locales = locales.filter(pluginConfig.get(`localeFilter`));
-    console.log(`default locale is : ${defaultLocale}`);
+    locales = contentfulLocales.filter(pluginConfig.get(`localeFilter`));
+
+    if (locales.length === 0) {
+      reporter.panic(`Please check if your localeFilter is configured properly. Locales '${_.join(contentfulLocales.map(item => item.code), `,`)}' were found but were filtered down to none.`);
+    }
+
+    reporter.info(`default locale is: ${defaultLocale}`);
   } catch (e) {
     let details;
     let errors;
@@ -84,7 +92,8 @@ ${formatPluginOptionsForCLI(pluginConfig.getOriginalPluginOptions(), errors)}`);
     let query = syncToken ? {
       nextSyncToken: syncToken
     } : {
-      initial: true
+      initial: true,
+      limit: pageLimit
     };
     currentSyncData = await client.sync(query);
   } catch (e) {
@@ -96,20 +105,28 @@ ${formatPluginOptionsForCLI(pluginConfig.getOriginalPluginOptions(), errors)}`);
   let contentTypes;
 
   try {
-    const pageLimit = pluginConfig.get(`pageLimit`);
     contentTypes = await pagedGet(client, `getContentTypes`, pageLimit);
   } catch (e) {
-    console.log(`error fetching content types`, e);
+    reporter.panic(`error fetching content types`, e);
   }
 
-  console.log(`contentTypes fetched`, contentTypes.items.length);
-  let contentTypeItems = contentTypes.items; // Fix IDs (inline) on entries and assets, created/updated and deleted.
+  reporter.info(`contentTypes fetched ${contentTypes.items.length}`);
+  let contentTypeItems = contentTypes.items;
 
-  contentTypeItems.forEach(normalize.fixIds);
-  currentSyncData.entries.forEach(normalize.fixIds);
-  currentSyncData.assets.forEach(normalize.fixIds);
-  currentSyncData.deletedEntries.forEach(normalize.fixIds);
-  currentSyncData.deletedAssets.forEach(normalize.fixIds);
+  if (process.env.EXPERIMENTAL_CONTENTFUL_SKIP_NORMALIZE_IDS) {
+    reporter.info(`Skipping normalization of \`.id\`, this means \`sys\` objects will not get a \`.contentful_id\``);
+  } else {
+    // Traverse entire data model and enforce every `sys.id` to be a string
+    // and if that string starts with a number, to prefix it with `c`. Assigns
+    // original `id` to `contentful_id`.
+    // Expensive at scale.
+    contentTypeItems.forEach(normalize.fixIds);
+    currentSyncData.entries.forEach(normalize.fixIds);
+    currentSyncData.assets.forEach(normalize.fixIds);
+    currentSyncData.deletedEntries.forEach(normalize.fixIds);
+    currentSyncData.deletedAssets.forEach(normalize.fixIds);
+  }
+
   const result = {
     currentSyncData,
     contentTypeItems,

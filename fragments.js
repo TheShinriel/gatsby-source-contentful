@@ -4,7 +4,6 @@ exports.__esModule = true;
 exports.GatsbyContentfulSizes_withWebp_noBase64 = exports.GatsbyContentfulSizes_withWebp = exports.GatsbyContentfulSizes_noBase64 = exports.GatsbyContentfulSizes_tracedSVG = exports.GatsbyContentfulSizes = exports.GatsbyContentfulResolutions_withWebp_noBase64 = exports.GatsbyContentfulResolutions_withWebp = exports.GatsbyContentfulResolutions_noBase64 = exports.GatsbyContentfulResolutions_tracedSVG = exports.GatsbyContentfulResolutions = exports.contentfulAssetFluidPreferWebpNoBase64 = exports.GatsbyContentfulFluid_withWebp = exports.GatsbyContentfulFluid_noBase64 = exports.GatsbyContentfulFluid_tracedSVG = exports.GatsbyContentfulFluid = exports.GatsbyContentfulFixed_withWebp_noBase64 = exports.GatsbyContentfulFixed_withWebp = exports.GatsbyContentfulFixed_noBase64 = exports.GatsbyContentfulFixed_tracedSVG = exports.GatsbyContentfulFixed = void 0;
 
 var _gatsby = require("gatsby");
-
 /**
  * The simplest set of fields for fixed assets
  * @type {Fragment}
@@ -21,6 +20,8 @@ var _gatsby = require("gatsby");
  *   }
  * }
  */
+
+
 const GatsbyContentfulFixed = (0, _gatsby.graphql)`
   fragment GatsbyContentfulFixed on ContentfulFixed {
     base64

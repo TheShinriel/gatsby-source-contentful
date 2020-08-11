@@ -1,3 +1,7 @@
+"use strict";
+
+var _process$env$GATSBY_R;
+
 const fs = require(`fs`);
 
 const path = require(`path`);
@@ -32,7 +36,7 @@ if (process.env.GATSBY_REMOTE_CACHE) {
   console.warn(`Please be aware that the \`GATSBY_REMOTE_CACHE\` env flag is not officially supported and could be removed at any time`);
 }
 
-const REMOTE_CACHE_FOLDER = process.env.GATSBY_REMOTE_CACHE ?? path.join(process.cwd(), `.cache/remote_cache`);
+const REMOTE_CACHE_FOLDER = (_process$env$GATSBY_R = process.env.GATSBY_REMOTE_CACHE) !== null && _process$env$GATSBY_R !== void 0 ? _process$env$GATSBY_R : path.join(process.cwd(), `.cache/remote_cache`);
 const CACHE_IMG_FOLDER = path.join(REMOTE_CACHE_FOLDER, `images`);
 
 const {
