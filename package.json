@@ -1,41 +1,4 @@
 {
-  "_args": [
-    [
-      "gatsby-source-contentful@2.1.86",
-      "/home/Francois.Duval/aws/dev-portal-amplify"
-    ]
-  ],
-  "_from": "gatsby-source-contentful@2.1.86",
-  "_id": "gatsby-source-contentful@2.1.86",
-  "_inBundle": false,
-  "_integrity": "sha512-FmfRaUMhlKLYRcRnex3PepBhFZfegXj6Ai0JoY3Ev3pep3mOhZknJxtRACF975oq7E6UHn9mckVFXoZPaYrZMg==",
-  "_location": "/gatsby-source-contentful",
-  "_phantomChildren": {
-    "@contentful/axios": "0.18.0",
-    "ansi-styles": "3.2.1",
-    "contentful-resolve-response": "1.1.4",
-    "contentful-sdk-core": "6.4.0",
-    "escape-string-regexp": "1.0.5",
-    "has-flag": "3.0.0",
-    "json-stringify-safe": "5.0.1",
-    "lodash": "4.17.15"
-  },
-  "_requested": {
-    "type": "version",
-    "registry": true,
-    "raw": "gatsby-source-contentful@2.1.86",
-    "name": "gatsby-source-contentful",
-    "escapedName": "gatsby-source-contentful",
-    "rawSpec": "2.1.86",
-    "saveSpec": null,
-    "fetchSpec": "2.1.86"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/gatsby-source-contentful/-/gatsby-source-contentful-2.1.86.tgz",
-  "_spec": "2.1.86",
-  "_where": "/home/Francois.Duval/aws/dev-portal-amplify",
   "author": {
     "name": "Marcus Ericsson",
     "email": "mericsson@gmail.com",
@@ -73,8 +36,6 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "gitHead": "717ee6eede217189820af2a644706a257e0a9623",
-  "homepage": "https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-source-contentful#readme",
   "keywords": [
     "gatsby",
     "gatsby-plugin",
