@@ -16,6 +16,8 @@ module.exports = async ({ syncToken, reporter, pluginConfig }) => {
     host: pluginConfig.get(`host`),
     environment: pluginConfig.get(`environment`),
     proxy: pluginConfig.get(`proxy`),
+    httpAgent: pluginConfig.get(`httpAgent`),
+    httpsAgent: pluginConfig.get(`httpsAgent`),
   }
 
   const client = contentful.createClient(contentfulClientOptions)

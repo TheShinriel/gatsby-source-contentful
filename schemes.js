@@ -1,5 +1,3 @@
-"use strict";
-
 const {
   GraphQLEnumType
 } = require(`gatsby/graphql`);

@@ -1,5 +1,3 @@
-"use strict";
-
 const _ = require(`lodash`);
 
 const stringify = require(`json-stringify-safe`);
@@ -251,7 +249,7 @@ function prepareTextNode(node, key, text, createNodeId) {
 
 function prepareRichTextNode(node, key, content, createNodeId) {
   const str = stringify(content);
-  const richTextNode = Object.assign({}, content, {
+  const richTextNode = { ...content,
     id: createNodeId(`${node.id}${key}RichTextNode`),
     parent: node.id,
     children: [],
@@ -262,16 +260,17 @@ function prepareRichTextNode(node, key, content, createNodeId) {
       content: str,
       contentDigest: digest(str)
     }
-  });
+  };
   node.children = node.children.concat([richTextNode.id]);
   return richTextNode;
 }
 
 function prepareJSONNode(node, key, content, createNodeId, i = ``) {
   const str = JSON.stringify(content);
-  const JSONNode = Object.assign({}, _.isPlainObject(content) ? Object.assign({}, content) : {
-    content: content
-  }, {
+  const JSONNode = { ...(_.isPlainObject(content) ? { ...content
+    } : {
+      content: content
+    }),
     id: createNodeId(`${node.id}${key}${i}JSONNode`),
     parent: node.id,
     children: [],
@@ -281,7 +280,7 @@ function prepareJSONNode(node, key, content, createNodeId, i = ``) {
       content: str,
       contentDigest: digest(str)
     }
-  });
+  };
   node.children = node.children.concat([JSONNode.id]);
   return JSONNode;
 }
@@ -472,9 +471,10 @@ exports.createContentTypeNodes = ({
           delete entryItemFields[entryItemFieldKey];
         }
       });
-      entryNode = Object.assign({}, entryItemFields, {}, entryNode, {
+      entryNode = { ...entryItemFields,
+        ...entryNode,
         node_locale: locale.code
-      }); // Get content digest of node.
+      }; // Get content digest of node.
 
       const contentDigest = digest(stringify(entryNode));
       entryNode.internal.contentDigest = contentDigest;
@@ -524,7 +524,8 @@ exports.createAssetNodes = ({
       locale,
       localesFallback
     });
-    const localizedAsset = Object.assign({}, assetItem); // Create a node for each asset. They may be referenced by Entries
+    const localizedAsset = { ...assetItem
+    }; // Create a node for each asset. They may be referenced by Entries
     //
     // Get localized fields.
 
@@ -533,17 +534,17 @@ exports.createAssetNodes = ({
       title: localizedAsset.fields.title ? getField(localizedAsset.fields.title) : ``,
       description: localizedAsset.fields.description ? getField(localizedAsset.fields.description) : ``
     };
-    const assetNode = Object.assign({
+    const assetNode = {
       contentful_id: localizedAsset.sys.contentful_id,
       id: mId(space.sys.id, localizedAsset.sys.id),
       parent: null,
-      children: []
-    }, localizedAsset.fields, {
+      children: [],
+      ...localizedAsset.fields,
       node_locale: locale.code,
       internal: {
         type: `${makeTypeName(`Asset`)}`
       }
-    }); // Get content digest of node.
+    }; // Get content digest of node.
 
     const contentDigest = digest(stringify(assetNode));
     assetNode.internal.contentDigest = contentDigest;

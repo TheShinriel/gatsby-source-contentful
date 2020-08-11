@@ -1,8 +1,3 @@
-"use strict";
-
-exports.__esModule = true;
-exports.createPluginConfig = exports.maskText = exports.formatPluginOptionsForCLI = exports.validateOptions = exports.defaultOptions = void 0;
-
 const Joi = require(`@hapi/joi`);
 
 const chalk = require(`chalk`);
@@ -19,17 +14,17 @@ const defaultOptions = {
   pageLimit: DEFAULT_PAGE_LIMIT,
   useNameForId: true
 };
-exports.defaultOptions = defaultOptions;
 
 const createPluginConfig = pluginOptions => {
-  const conf = Object.assign({}, defaultOptions, {}, pluginOptions);
+  const conf = { ...defaultOptions,
+    ...pluginOptions
+  };
   return {
     get: key => conf[key],
     getOriginalPluginOptions: () => pluginOptions
   };
 };
 
-exports.createPluginConfig = createPluginConfig;
 const optionsSchema = Joi.object().keys({
   accessToken: Joi.string().required().empty(),
   spaceId: Joi.string().required().empty(),
@@ -69,8 +64,6 @@ const validateOptions = ({
 ${exports.formatPluginOptionsForCLI(options, errors)}`);
   }
 };
-
-exports.validateOptions = validateOptions;
 
 const formatPluginOptionsForCLI = (pluginOptions, errors = {}) => {
   const optionKeys = new Set(Object.keys(pluginOptions).concat(Object.keys(defaultOptions)).concat(Object.keys(errors)));
@@ -113,12 +106,10 @@ const formatPluginOptionsForCLI = (pluginOptions, errors = {}) => {
  */
 
 
-exports.formatPluginOptionsForCLI = formatPluginOptionsForCLI;
-
 const maskText = input => {
   // show just 25% of string up to 4 characters
   const hiddenCharactersLength = input.length - Math.min(4, Math.floor(input.length * 0.25));
   return `${`*`.repeat(hiddenCharactersLength)}${input.substring(hiddenCharactersLength)}`;
 };
 
-exports.maskText = maskText;
+export { defaultOptions, validateOptions, formatPluginOptionsForCLI, maskText, createPluginConfig };

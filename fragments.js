@@ -1,11 +1,22 @@
-"use strict";
+import { graphql } from "gatsby";
+/**
+ * The simplest set of fields for fixed assets
+ * @type {Fragment}
+ * @example
+ * myContentfulAssetField {
+ *   fixed {
+ *     ...GatsbyContentfulFixed
+ *     # ^ identical to using the following fields:
+ *     # base64
+ *     # width
+ *     # height
+ *     # src
+ *     # srcSet
+ *   }
+ * }
+ */
 
-exports.__esModule = true;
-exports.GatsbyContentfulSizes_withWebp_noBase64 = exports.GatsbyContentfulSizes_withWebp = exports.GatsbyContentfulSizes_noBase64 = exports.GatsbyContentfulSizes_tracedSVG = exports.GatsbyContentfulSizes = exports.GatsbyContentfulResolutions_withWebp_noBase64 = exports.GatsbyContentfulResolutions_withWebp = exports.GatsbyContentfulResolutions_noBase64 = exports.GatsbyContentfulResolutions_tracedSVG = exports.GatsbyContentfulResolutions = exports.contentfulAssetFluidPreferWebpNoBase64 = exports.GatsbyContentfulFluid_withWebp = exports.GatsbyContentfulFluid_noBase64 = exports.GatsbyContentfulFluid_tracedSVG = exports.GatsbyContentfulFluid = exports.GatsbyContentfulFixed_withWebp_noBase64 = exports.GatsbyContentfulFixed_withWebp = exports.GatsbyContentfulFixed_noBase64 = exports.GatsbyContentfulFixed_tracedSVG = exports.GatsbyContentfulFixed = void 0;
-
-var _gatsby = require("gatsby");
-
-const GatsbyContentfulFixed = _gatsby.graphql`
+export const GatsbyContentfulFixed = graphql`
   fragment GatsbyContentfulFixed on ContentfulFixed {
     base64
     width
@@ -19,8 +30,7 @@ const GatsbyContentfulFixed = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFixed = GatsbyContentfulFixed;
-const GatsbyContentfulFixed_tracedSVG = _gatsby.graphql`
+export const GatsbyContentfulFixed_tracedSVG = graphql`
   fragment GatsbyContentfulFixed_tracedSVG on ContentfulFixed {
     tracedSVG
     width
@@ -34,8 +44,7 @@ const GatsbyContentfulFixed_tracedSVG = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFixed_tracedSVG = GatsbyContentfulFixed_tracedSVG;
-const GatsbyContentfulFixed_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulFixed_noBase64 = graphql`
   fragment GatsbyContentfulFixed_noBase64 on ContentfulFixed {
     width
     height
@@ -48,8 +57,7 @@ const GatsbyContentfulFixed_noBase64 = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFixed_noBase64 = GatsbyContentfulFixed_noBase64;
-const GatsbyContentfulFixed_withWebp = _gatsby.graphql`
+export const GatsbyContentfulFixed_withWebp = graphql`
   fragment GatsbyContentfulFixed_withWebp on ContentfulFixed {
     base64
     width
@@ -65,8 +73,7 @@ const GatsbyContentfulFixed_withWebp = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFixed_withWebp = GatsbyContentfulFixed_withWebp;
-const GatsbyContentfulFixed_withWebp_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulFixed_withWebp_noBase64 = graphql`
   fragment GatsbyContentfulFixed_withWebp_noBase64 on ContentfulFixed {
     width
     height
@@ -81,8 +88,7 @@ const GatsbyContentfulFixed_withWebp_noBase64 = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFixed_withWebp_noBase64 = GatsbyContentfulFixed_withWebp_noBase64;
-const GatsbyContentfulFluid = _gatsby.graphql`
+export const GatsbyContentfulFluid = graphql`
   fragment GatsbyContentfulFluid on ContentfulFluid {
     base64
     aspectRatio
@@ -96,8 +102,7 @@ const GatsbyContentfulFluid = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFluid = GatsbyContentfulFluid;
-const GatsbyContentfulFluid_tracedSVG = _gatsby.graphql`
+export const GatsbyContentfulFluid_tracedSVG = graphql`
   fragment GatsbyContentfulFluid_tracedSVG on ContentfulFluid {
     tracedSVG
     aspectRatio
@@ -111,8 +116,7 @@ const GatsbyContentfulFluid_tracedSVG = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFluid_tracedSVG = GatsbyContentfulFluid_tracedSVG;
-const GatsbyContentfulFluid_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulFluid_noBase64 = graphql`
   fragment GatsbyContentfulFluid_noBase64 on ContentfulFluid {
     aspectRatio
     src
@@ -125,8 +129,7 @@ const GatsbyContentfulFluid_noBase64 = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFluid_noBase64 = GatsbyContentfulFluid_noBase64;
-const GatsbyContentfulFluid_withWebp = _gatsby.graphql`
+export const GatsbyContentfulFluid_withWebp = graphql`
   fragment GatsbyContentfulFluid_withWebp on ContentfulFluid {
     base64
     aspectRatio
@@ -142,8 +145,7 @@ const GatsbyContentfulFluid_withWebp = _gatsby.graphql`
  * @type {Fragment}
  */
 
-exports.GatsbyContentfulFluid_withWebp = GatsbyContentfulFluid_withWebp;
-const contentfulAssetFluidPreferWebpNoBase64 = _gatsby.graphql`
+export const contentfulAssetFluidPreferWebpNoBase64 = graphql`
   fragment GatsbyContentfulFluid_withWebp_noBase64 on ContentfulFluid {
     aspectRatio
     src
@@ -154,8 +156,7 @@ const contentfulAssetFluidPreferWebpNoBase64 = _gatsby.graphql`
   }
 `; // TODO: in v3 remove these legacy fragments
 
-exports.contentfulAssetFluidPreferWebpNoBase64 = contentfulAssetFluidPreferWebpNoBase64;
-const GatsbyContentfulResolutions = _gatsby.graphql`
+export const GatsbyContentfulResolutions = graphql`
   fragment GatsbyContentfulResolutions on ContentfulResolutions {
     base64
     width
@@ -164,8 +165,7 @@ const GatsbyContentfulResolutions = _gatsby.graphql`
     srcSet
   }
 `;
-exports.GatsbyContentfulResolutions = GatsbyContentfulResolutions;
-const GatsbyContentfulResolutions_tracedSVG = _gatsby.graphql`
+export const GatsbyContentfulResolutions_tracedSVG = graphql`
   fragment GatsbyContentfulResolutions_tracedSVG on ContentfulResolutions {
     tracedSVG
     width
@@ -174,8 +174,7 @@ const GatsbyContentfulResolutions_tracedSVG = _gatsby.graphql`
     srcSet
   }
 `;
-exports.GatsbyContentfulResolutions_tracedSVG = GatsbyContentfulResolutions_tracedSVG;
-const GatsbyContentfulResolutions_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulResolutions_noBase64 = graphql`
   fragment GatsbyContentfulResolutions_noBase64 on ContentfulResolutions {
     width
     height
@@ -183,8 +182,7 @@ const GatsbyContentfulResolutions_noBase64 = _gatsby.graphql`
     srcSet
   }
 `;
-exports.GatsbyContentfulResolutions_noBase64 = GatsbyContentfulResolutions_noBase64;
-const GatsbyContentfulResolutions_withWebp = _gatsby.graphql`
+export const GatsbyContentfulResolutions_withWebp = graphql`
   fragment GatsbyContentfulResolutions_withWebp on ContentfulResolutions {
     base64
     width
@@ -195,8 +193,7 @@ const GatsbyContentfulResolutions_withWebp = _gatsby.graphql`
     srcSetWebp
   }
 `;
-exports.GatsbyContentfulResolutions_withWebp = GatsbyContentfulResolutions_withWebp;
-const GatsbyContentfulResolutions_withWebp_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulResolutions_withWebp_noBase64 = graphql`
   fragment GatsbyContentfulResolutions_withWebp_noBase64 on ContentfulResolutions {
     width
     height
@@ -206,8 +203,7 @@ const GatsbyContentfulResolutions_withWebp_noBase64 = _gatsby.graphql`
     srcSetWebp
   }
 `;
-exports.GatsbyContentfulResolutions_withWebp_noBase64 = GatsbyContentfulResolutions_withWebp_noBase64;
-const GatsbyContentfulSizes = _gatsby.graphql`
+export const GatsbyContentfulSizes = graphql`
   fragment GatsbyContentfulSizes on ContentfulSizes {
     base64
     aspectRatio
@@ -216,8 +212,7 @@ const GatsbyContentfulSizes = _gatsby.graphql`
     sizes
   }
 `;
-exports.GatsbyContentfulSizes = GatsbyContentfulSizes;
-const GatsbyContentfulSizes_tracedSVG = _gatsby.graphql`
+export const GatsbyContentfulSizes_tracedSVG = graphql`
   fragment GatsbyContentfulSizes_tracedSVG on ContentfulSizes {
     tracedSVG
     aspectRatio
@@ -226,8 +221,7 @@ const GatsbyContentfulSizes_tracedSVG = _gatsby.graphql`
     sizes
   }
 `;
-exports.GatsbyContentfulSizes_tracedSVG = GatsbyContentfulSizes_tracedSVG;
-const GatsbyContentfulSizes_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulSizes_noBase64 = graphql`
   fragment GatsbyContentfulSizes_noBase64 on ContentfulSizes {
     aspectRatio
     src
@@ -235,8 +229,7 @@ const GatsbyContentfulSizes_noBase64 = _gatsby.graphql`
     sizes
   }
 `;
-exports.GatsbyContentfulSizes_noBase64 = GatsbyContentfulSizes_noBase64;
-const GatsbyContentfulSizes_withWebp = _gatsby.graphql`
+export const GatsbyContentfulSizes_withWebp = graphql`
   fragment GatsbyContentfulSizes_withWebp on ContentfulSizes {
     base64
     aspectRatio
@@ -247,8 +240,7 @@ const GatsbyContentfulSizes_withWebp = _gatsby.graphql`
     sizes
   }
 `;
-exports.GatsbyContentfulSizes_withWebp = GatsbyContentfulSizes_withWebp;
-const GatsbyContentfulSizes_withWebp_noBase64 = _gatsby.graphql`
+export const GatsbyContentfulSizes_withWebp_noBase64 = graphql`
   fragment GatsbyContentfulSizes_withWebp_noBase64 on ContentfulSizes {
     aspectRatio
     src
@@ -258,4 +250,3 @@ const GatsbyContentfulSizes_withWebp_noBase64 = _gatsby.graphql`
     sizes
   }
 `;
-exports.GatsbyContentfulSizes_withWebp_noBase64 = GatsbyContentfulSizes_withWebp_noBase64;

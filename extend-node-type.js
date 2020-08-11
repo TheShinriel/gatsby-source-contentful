@@ -1,5 +1,3 @@
-"use strict";
-
 const Promise = require(`bluebird`);
 
 const {
@@ -151,10 +149,10 @@ const resolveFixed = (image, options) => {
     }
 
     const h = Math.round(size / desiredAspectRatio);
-    return `${createUrl(baseUrl, Object.assign({}, options, {
+    return `${createUrl(baseUrl, { ...options,
       width: size,
       height: h
-    }))} ${resolution}`;
+    })} ${resolution}`;
   }).join(`,\n`);
   let pickedHeight, pickedWidth;
 
@@ -171,9 +169,9 @@ const resolveFixed = (image, options) => {
     baseUrl,
     width: Math.round(pickedWidth),
     height: Math.round(pickedHeight),
-    src: createUrl(baseUrl, Object.assign({}, options, {
+    src: createUrl(baseUrl, { ...options,
       width: options.width
-    })),
+    }),
     srcSet
   };
 };
@@ -239,18 +237,18 @@ const resolveFluid = (image, options) => {
 
   const srcSet = sortedSizes.map(width => {
     const h = Math.round(width / desiredAspectRatio);
-    return `${createUrl(image.file.url, Object.assign({}, options, {
+    return `${createUrl(image.file.url, { ...options,
       width,
       height: h
-    }))} ${Math.round(width)}w`;
+    })} ${Math.round(width)}w`;
   }).join(`,\n`);
   return {
     aspectRatio: desiredAspectRatio,
     baseUrl,
-    src: createUrl(baseUrl, Object.assign({}, options, {
+    src: createUrl(baseUrl, { ...options,
       width: options.maxWidth,
       height: options.maxHeight
-    })),
+    }),
     srcSet,
     sizes: options.sizes
   };
@@ -346,9 +344,9 @@ const fixedNodeType = ({
               return null;
             }
 
-            const fixed = resolveFixed(image, Object.assign({}, options, {
+            const fixed = resolveFixed(image, { ...options,
               toFormat: `webp`
-            }));
+            });
             return _.get(fixed, `src`);
           }
 
@@ -365,9 +363,9 @@ const fixedNodeType = ({
               return null;
             }
 
-            const fixed = resolveFixed(image, Object.assign({}, options, {
+            const fixed = resolveFixed(image, { ...options,
               toFormat: `webp`
-            }));
+            });
             return _.get(fixed, `srcSet`);
           }
 
@@ -403,11 +401,11 @@ const fixedNodeType = ({
     },
     resolve: (image, options, context) => Promise.resolve(resolveFixed(image, options)).then(node => {
       if (!node) return null;
-      return Object.assign({}, node, {
+      return { ...node,
         image,
         options,
         context
-      });
+      };
     })
   };
 };
@@ -453,9 +451,9 @@ const fluidNodeType = ({
               return null;
             }
 
-            const fluid = resolveFluid(image, Object.assign({}, options, {
+            const fluid = resolveFluid(image, { ...options,
               toFormat: `webp`
-            }));
+            });
             return _.get(fluid, `src`);
           }
 
@@ -472,9 +470,9 @@ const fluidNodeType = ({
               return null;
             }
 
-            const fluid = resolveFluid(image, Object.assign({}, options, {
+            const fluid = resolveFluid(image, { ...options,
               toFormat: `webp`
-            }));
+            });
             return _.get(fluid, `srcSet`);
           }
 
@@ -516,11 +514,11 @@ const fluidNodeType = ({
     },
     resolve: (image, options, context) => Promise.resolve(resolveFluid(image, options)).then(node => {
       if (!node) return null;
-      return Object.assign({}, node, {
+      return { ...node,
         image,
         options,
         context
-      });
+      };
     })
   };
 };

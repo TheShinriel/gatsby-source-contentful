@@ -1,7 +1,7 @@
-"use strict";
-
 const contentful = require(`contentful`);
+
 const _ = require(`lodash`);
+
 const chalk = require(`chalk`);
 
 const normalize = require(`./normalize`);
@@ -18,7 +18,6 @@ module.exports = async ({
   // Fetch articles.
   console.time(`Fetch Contentful data`);
   console.log(`Starting to fetch data from Contentful`);
-
   const contentfulClientOptions = {
     space: pluginConfig.get(`spaceId`),
     accessToken: pluginConfig.get(`accessToken`),
@@ -26,10 +25,12 @@ module.exports = async ({
     environment: pluginConfig.get(`environment`),
     proxy: pluginConfig.get(`proxy`),
     httpAgent: pluginConfig.get(`httpAgent`),
-    httpsAgent: pluginConfig.get(`httpsAgent`),
+    httpsAgent: pluginConfig.get(`httpsAgent`)
   };
-
   const client = contentful.createClient(contentfulClientOptions); // The sync API puts the locale in all fields in this format { fieldName:
+  // {'locale': value} } so we need to get the space and its default local.
+  //
+  // We'll extend this soon to support multiple locales.
 
   let space;
   let locales;
@@ -45,7 +46,6 @@ module.exports = async ({
     locales = locales.filter(pluginConfig.get(`localeFilter`));
     console.log(`default locale is : ${defaultLocale}`);
   } catch (e) {
-    console.error(e)
     let details;
     let errors;
 
@@ -127,11 +127,11 @@ ${formatPluginOptionsForCLI(pluginConfig.getOriginalPluginOptions(), errors)}`);
 
 
 function pagedGet(client, method, pageLimit, query = {}, skip = 0, aggregatedResponse = null) {
-  return client[method](Object.assign({}, query, {
+  return client[method]({ ...query,
     skip: skip,
     limit: pageLimit,
     order: `sys.createdAt`
-  })).then(response => {
+  }).then(response => {
     if (!aggregatedResponse) {
       aggregatedResponse = response;
     } else {
